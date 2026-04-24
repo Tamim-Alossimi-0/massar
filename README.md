@@ -1,162 +1,87 @@
-# Saudi Resume-Job Matcher
+# Massar | مسار
 
-An AI-powered tool that matches CVs against Saudi tech job listings using semantic similarity and skill analysis. Upload a resume, the system ranks live Riyadh job postings by how well they fit the candidate, and explains why each match scored the way it did.
+AI-powered career matching platform that connects job seekers with tech roles in Saudi Arabia using semantic analysis and skill matching.
 
----
+## What it does
+
+Upload your CV and Massar ranks it against 1,300+ real tech job listings scraped from LinkedIn across Saudi Arabia. You get a ranked list of the best-fit roles, a breakdown of which skills matched and which are missing, estimated salary ranges for the matched positions, and targeted recommendations for closing the gap between your profile and the roles you want.
+
+## How matching works
+
+Every CV is scored against every job using a 4-signal hybrid pipeline. The weights were tuned on a held-out set of labeled CV / job pairs.
+
+- Semantic similarity (40%) — Nomic-embed-text-v1.5 produces 768-dimensional embeddings for both CV and job description; cosine similarity captures meaning beyond exact keyword overlap.
+- Skill overlap (35%) — 100+ skill patterns with alias matching (js -> javascript, k8s -> kubernetes). Required skills count double versus skills that merely appear in the description.
+- TF-IDF keyword matching (15%) — 1-2 gram vectorizer catches exact terminology and niche tools the embeddings sometimes smooth over.
+- Experience fit (10%) — candidate years are compared against the job's required range, with soft penalties for over- and under-qualification.
+
+The CV is first parsed into sections (Skills, Experience, Education, Other) and reordered so the most discriminative content sits at the top of the embedded text.
+
+## Tech stack
+
+Frontend: Next.js, Tailwind CSS, shadcn/ui, Recharts
+Backend: FastAPI, Python 3.10+
+ML / NLP: Sentence Transformers, Nomic Embed, scikit-learn
+Data: LinkedIn scraping via python-jobspy, PDF parsing via pdfplumber
 
 ## Features
 
-- **Semantic matching with Nomic-embed-text-v1.5** — 768-dimensional embeddings with an 8192-token context window, using Nomic's `search_query` / `search_document` task prefixes.
-- **4-signal hybrid scoring** — combines:
-  - Semantic cosine similarity (40%)
-  - Direct skill overlap with required-vs-description weighting (35%)
-  - TF-IDF cosine similarity over 1-2 grams (15%)
-  - Experience-years match (10%)
-- **100+ skill extraction patterns** with alias support (e.g. `js` -> `javascript`, `k8s` -> `kubernetes`) and acronym guards to prevent false positives.
-- **Section-aware CV parsing** — resumes are split into Skills / Experience / Education / Other and reordered (skills first, experience second) before embedding, so the query vector emphasises the most discriminative content.
-- **GPU-accelerated** — CUDA-enabled PyTorch for fast embedding on NVIDIA GPUs; falls back to CPU transparently.
-- **Seniority filtering** — Entry / Junior / Mid / Senior ranges with senior-title exclusion for entry-level searches.
-- **Disk-cached embeddings** — first startup encodes the full corpus (~7 min on 1400 jobs); subsequent startups load from disk in under a second. Caches auto-invalidate when the underlying CSV changes.
-- **Interactive Streamlit UI** — skill verification multiselect, keyword search, salary / experience display, downloadable CSV of matches, and per-job match explanations.
+- Real-time CV parsing and skill extraction from PDF or TXT
+- Section-aware CV processing with Skills / Experience / Education reordering
+- Career gap report with salary estimates and targeted skill recommendations
+- Interactive skill demand visualization across matched roles
+- Side-by-side job comparison
+- Market dashboard with hiring trends and top employers
+- GPU-accelerated matching with automatic CPU fallback
+- Try Demo button for an instant preview without uploading a CV
 
----
+## Getting started
 
-## Tech Stack
-
-- **Python 3.11**
-- **Streamlit** — web UI
-- **Sentence Transformers** with **Nomic Embed** — semantic embeddings
-- **scikit-learn** — TF-IDF and cosine similarity
-- **PyTorch** (CUDA 12.1) — GPU acceleration
-- **pdfplumber** — PDF resume parsing
-- **Playwright** — Jadarat.sa scraping
-- **python-jobspy** — LinkedIn scraping
-
----
-
-## Installation
+Clone the repo:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/Tamim-Alossimi-0/saudi-resume-job-matcher.git
 cd saudi-resume-job-matcher
+```
 
-python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# macOS / Linux
-source .venv/bin/activate
+Run the backend:
 
+```bash
 pip install -r requirements.txt
+uvicorn api:app --port 8000
 ```
 
-**Install PyTorch with CUDA 12.1 (recommended for NVIDIA GPUs):**
+Run the frontend in a second terminal:
 
 ```bash
-pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+cd frontend
+npm install
+npm run dev
 ```
 
-For CPU-only systems, use the CPU wheel instead:
+Open http://localhost:3000 and upload a CV, or click Try Demo.
 
-```bash
-pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+GPU users: install a CUDA-enabled PyTorch build before `pip install -r requirements.txt`, following the selector at https://pytorch.org/get-started/locally/. The embedding pipeline automatically uses CUDA when available and falls back to CPU otherwise.
+
+## Project structure
+
+```
+saudi-resume-job-matcher/
+├── api.py                  FastAPI app, endpoints, lifespan priming
+├── model.py                Embedding, TF-IDF, scoring, ranking pipeline
+├── utils.py                Skill vocabulary, aliases, PDF / text parsing
+├── scraper.py              Scraper orchestration
+├── linkedin_collector.py   LinkedIn collector via python-jobspy
+├── gap_report.py           Skill gap and salary recommendations
+├── frontend/               Next.js app (pages, components, lib)
+├── data/
+│   └── processed/
+│       └── jobs_clean.csv  1,387-row cleaned job dataset
+└── requirements.txt
 ```
 
-**Install Playwright browser (for Jadarat scraping):**
+Pre-computed embedding and TF-IDF caches live under `data/embeddings_cache/` and ship with the repo so cold starts are under a second.
 
-```bash
-python -m playwright install chromium
-```
+## Author
 
----
-
-## Usage
-
-Start the Streamlit app:
-
-```bash
-streamlit run app.py
-```
-
-The app opens in your browser. Upload a PDF or TXT resume, verify the auto-detected skills, and the top matches are ranked instantly.
-
-To refresh the job dataset with live Riyadh listings, click **Collect Real Jobs** in the sidebar. The collector tries Jadarat first, falls back to LinkedIn, then Bayt, and only uses synthetic data as a last resort.
-
-Run the test suite:
-
-```bash
-pytest tests/
-```
-
-Run the offline evaluator:
-
-```bash
-python evaluator.py
-```
-
----
-
-## Project Structure
-
-| File | Responsibility |
-|---|---|
-| `app.py` | Streamlit UI — upload widget, sidebar filters, result cards, CSV export |
-| `model.py` | Core matching engine — embeddings, TF-IDF, skill scoring, experience scoring, explanation generation, disk cache |
-| `utils.py` | Text preprocessing, skill extraction vocabulary + regex patterns, CV section splitter, PDF parser |
-| `scraper.py` | Data pipeline orchestrator — Jadarat -> LinkedIn -> Bayt -> synthetic fallback |
-| `jadarat_collector.py` | Playwright-based scraper for jadarat.sa |
-| `linkedin_collector.py` | LinkedIn collector via python-jobspy (20-keyword sweep across Riyadh) |
-| `evaluator.py` | Offline benchmark against 10 labelled CV / job pairs |
-| `tests/test_matching.py` | Unit tests for skill extraction and matching pipeline |
-| `data/processed/jobs_clean.csv` | Canonical job dataset |
-| `data/embeddings_cache/` | Disk cache for job embeddings (`.npy`) and TF-IDF matrix (`.joblib`) with metadata |
-
----
-
-## How Matching Works
-
-Given a CV and a filtered set of jobs, the engine runs four independent scoring signals, combines them by fixed weights, and returns the top N.
-
-**1. Semantic similarity (40%)**
-The CV is split into sections, reordered (skills first), prefixed with Nomic's `search_query:` token, and embedded. Jobs are embedded once at startup (cached on disk) with the `search_document:` prefix. Cosine similarity between the CV vector and each job vector gives the semantic score.
-
-**2. Skill overlap (35%)**
-Both CV and job text are scanned for 100+ known skills using alias-aware regex. Required skills (from the `required_skills` column) count double; skills mentioned only in the description count single. The score is weighted-matched divided by weighted-total.
-
-**3. TF-IDF cosine similarity (15%)**
-A TF-IDF vectorizer is fit on the full job corpus at startup (cached to disk via joblib) with 1-2 grams, English stopwords, and `min_df=2`. The CV is transformed with the same vocabulary and cosine-compared to each job. This catches lexical overlap that the semantic model may downweight.
-
-**4. Experience match (10%)**
-Years are extracted from the job description (e.g. "3+ years of Python") and compared to the user's input years. The score is `min(user_years / job_years, 1.0)`; jobs with no stated requirement score 1.0 when the user provides experience, 0.8 otherwise.
-
-The four scores are combined: `overall = 0.40 * semantic + 0.35 * skills + 0.15 * tfidf + 0.10 * experience`. Results are sorted by overall score and the top N are returned with a per-job explanation summarising which signals drove the match.
-
----
-
-## Data Sources
-
-The collector orchestrates three real sources with a synthetic fallback:
-
-1. **Jadarat.sa** — Saudi Arabia's official government jobs portal, scraped with Playwright. Cloudflare frequently blocks automated access, so this is a best-effort source.
-2. **LinkedIn** — scraped via `python-jobspy` across 20 tech keywords (data scientist, software engineer, devops engineer, cybersecurity analyst, and more) with `results_wanted=100` per keyword. Results are Riyadh-filtered, normalised to the canonical schema, and deduplicated by title + company.
-3. **Bayt.com** — HTTP + BeautifulSoup scrape of bayt.com search results.
-4. **Synthetic fallback** — 1000 deterministic tech jobs generated across 7 sectors with title-aware experience-year ranges. Used only when all real sources fail.
-
-Real listings take priority over synthetic on dedup: when a LinkedIn row shares a title + company key with a synthetic row, the real row is kept. The merged dataset is written to `data/processed/jobs_clean.csv`.
-
----
-
-## Performance
-
-On an RTX 4060 with 1387 jobs:
-
-| Operation | Time |
-|---|---|
-| First startup (encode + TF-IDF fit) | ~7 minutes |
-| Subsequent startup (disk cache hit) | < 1 second |
-| Single CV match (top 10) | ~2 seconds |
-
----
-
-## License
-
-MIT
+Tamim Khalid Alossimi
