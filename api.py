@@ -465,3 +465,18 @@ async def refresh_jobs() -> RefreshResponse:
         job_count=count,
         message=f"Pipeline completed. {count} jobs loaded.",
     )
+
+
+# -----------------------------------------------------------------------------
+# Entry point for `python api.py` (HF Spaces / local quick-start)
+#
+# uvicorn is still the normal production launcher (see Dockerfile CMD), but this
+# block lets the app boot anywhere the runtime sets a PORT env var without
+# needing a custom command. Default 7860 matches HF Spaces' Docker SDK port.
+# -----------------------------------------------------------------------------
+if __name__ == "__main__":
+    import os
+    import uvicorn
+
+    port = int(os.environ.get("PORT", 7860))
+    uvicorn.run("api:app", host="0.0.0.0", port=port)
