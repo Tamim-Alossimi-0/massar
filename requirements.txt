@@ -1,11 +1,15 @@
 # Core data
-pandas==2.2.2
-numpy==1.26.4
+# numpy kept below 2.0 because torch 2.2.x and sentence-transformers 2.7
+# pre-built wheels are still compiled against the numpy 1.x ABI.
+pandas>=2.2.2
+numpy>=1.26.3,<2.0
 joblib
 
 # NLP & ML
-scikit-learn==1.4.2
-sentence-transformers==2.7.0
+# Floors reflect the versions this project was developed against; pip is
+# free to pick newer compatible releases during the HF Space build.
+scikit-learn>=1.4.2
+sentence-transformers>=2.7.0
 
 # PyTorch — CUDA 12.1 wheel (RTX 4060 / any CUDA-capable GPU)
 # Install via: pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cu121
