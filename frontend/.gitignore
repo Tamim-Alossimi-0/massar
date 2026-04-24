@@ -9,6 +9,9 @@ next.user-config.*
 
 # Environment variables
 .env*.local
+# .env.local is intentionally committed so the production API URL is
+# available at `next dev` time as well as in Vercel builds.
+!.env.local
 
 # Common ignores
 node_modules

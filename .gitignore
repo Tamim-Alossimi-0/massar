@@ -22,6 +22,11 @@ env/
 .env
 .env.*
 !.env.example
+# Frontend Next.js env files are committed so Vercel builds have the
+# production API URL baked in. NEXT_PUBLIC_* values are public anyway —
+# they're inlined into the client bundle at build time.
+!frontend/.env.production
+!frontend/.env.local
 
 # ---------------------------------------------------------------------
 # Node / Next.js
