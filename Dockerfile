@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api.py model.py utils.py scraper.py linkedin_collector.py jadarat_collector.py gap_report.py evaluator.py ./
 COPY data/processed/ data/processed/
+COPY data/embeddings_cache/ data/embeddings_cache/
 
 EXPOSE 7860
 

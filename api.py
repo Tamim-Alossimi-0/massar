@@ -65,10 +65,18 @@ state = _State()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # noqa: ARG001
-    """Load the jobs DataFrame only. Embedding is deferred to first use
-    so `uvicorn` comes up immediately instead of blocking on model encode."""
+    """Load the jobs DataFrame and prime embeddings at startup.
+
+    With the embedding cache shipped in the Docker image, prime_embeddings()
+    loads the pre-computed .npy + pickles off disk in under a second, so we
+    pay that cost once during container boot and every /api/match request
+    is fast from the first hit. If the cache is ever missing (e.g. local
+    dev after a fresh clone), the first boot re-encodes the corpus — still
+    better done here than blocking a user-facing request.
+    """
     _load_jobs_only()
-    log.info("Server ready. Job embeddings will be computed lazily on first match request.")
+    _ensure_primed()
+    log.info("Server ready.")
     yield
     log.info("API shutting down")
 
