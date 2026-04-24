@@ -1,0 +1,66 @@
+# ---------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# ---------------------------------------------------------------------
+# Secrets / local config (NEVER commit)
+# ---------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------
+# Node / Next.js
+# ---------------------------------------------------------------------
+node_modules/
+.next/
+out/
+.vercel/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ---------------------------------------------------------------------
+# Data pipeline
+# ---------------------------------------------------------------------
+# Raw scraper dumps — regenerable from collectors, not shipped.
+data/raw/
+
+# Scratch files written during a refresh run
+data/tmp*
+
+# Stale ChromaDB experiments (superseded by data/embeddings_cache/)
+data/chromadb_test/
+data/chromadb_test2/
+
+# NOTE: the following ARE committed so the deployed app has data +
+# pre-computed caches and can come up cold in <1s:
+#   data/processed/jobs_clean.csv
+#   data/embeddings_cache/job_embeddings.npy
+#   data/embeddings_cache/meta.json
+#   data/embeddings_cache/tfidf_matrix.pkl
+#   data/embeddings_cache/tfidf_vectorizer.pkl
+
+# ---------------------------------------------------------------------
+# Editor / OS
+# ---------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
