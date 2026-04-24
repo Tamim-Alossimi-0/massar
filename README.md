@@ -1,13 +1,3 @@
----
-title: Massar API
-emoji: 🎯
-colorFrom: green
-colorTo: blue
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # Massar | مسار
 
 AI-powered career matching platform that connects job seekers with tech roles in Saudi Arabia using semantic analysis and skill matching.
