@@ -12,6 +12,9 @@ pinned: false
 
 AI-powered career matching platform that connects job seekers with tech roles in Saudi Arabia using semantic analysis and skill matching.
 
+**Live Demo:** https://massar-ashy.vercel.app
+**API Backend:** https://tamimalossimi-massar-api.hf.space
+
 ## What it does
 
 Upload your CV and Massar ranks it against 1,300+ real tech job listings scraped from LinkedIn across Saudi Arabia. You get a ranked list of the best-fit roles, a breakdown of which skills matched and which are missing, estimated salary ranges for the matched positions, and targeted recommendations for closing the gap between your profile and the roles you want.
