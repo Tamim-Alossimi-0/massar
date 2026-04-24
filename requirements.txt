@@ -1,20 +1,18 @@
 # Core data
-# numpy kept below 2.0 because torch 2.2.x and sentence-transformers 2.7
-# pre-built wheels are still compiled against the numpy 1.x ABI.
 pandas>=2.2.2
-numpy>=1.26.3,<2.0
+numpy>=1.26.3
 joblib
 
 # NLP & ML
-# Floors reflect the versions this project was developed against; pip is
-# free to pick newer compatible releases during the HF Space build.
 scikit-learn>=1.4.2
 sentence-transformers>=2.7.0
 
 # PyTorch — CUDA 12.1 wheel (RTX 4060 / any CUDA-capable GPU)
-# Install via: pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cu121
-# For CPU-only fallback: pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
-torch==2.2.2
+# Install via: pip install torch --index-url https://download.pytorch.org/whl/cu121
+# For CPU-only fallback: pip install torch --index-url https://download.pytorch.org/whl/cpu
+# NOTE: Do NOT pin torch here — the Dockerfile pre-installs CPU torch.
+# Locally, install the CUDA wheel manually with the command above.
+torch>=2.4.0
 
 # Nomic-embed-text-v1.5 requires einops for its custom model code
 einops
